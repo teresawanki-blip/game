@@ -3,90 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>面試法寶大檢查 - 計分版</title>
+    <title>面試法寶大檢查 - 強調計分版</title>
     <style>
         :root {
-            --success-color: #2ecc71;
-            --error-color: #e74c3c;
-            --bg-color: #f0f7fa;
-            --primary-color: #3498db;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg: #f8fbfe;
+            --primary: #3498db;
+            --text: #2c3e50;
         }
         body { 
             font-family: "Microsoft JhengHei", sans-serif; 
             text-align: center; 
-            background-color: var(--bg-color); 
+            background-color: var(--bg); 
             margin: 0; 
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
             user-select: none;
         }
         #game-box { 
             background: white; 
-            border-radius: 40px; 
-            padding: 30px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            width: 85%; 
-            max-width: 650px;
-            position: relative;
+            border-radius: 30px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
+            width: 90%; 
+            max-width: 600px;
+            overflow: hidden;
         }
-        .stats {
+
+        /* 頂部狀態列 - 讓計分更明顯 */
+        .header-bar {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 25px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             font-size: 24px;
             font-weight: bold;
-            color: #7f8c8d;
-            margin-bottom: 10px;
         }
-        h1 { color: #2c3e50; font-size: 2rem; margin: 0; }
-        
-        #display-area { 
-            background: #fdfdfd;
-            border: 6px solid #eef2f3;
-            border-radius: 30px;
-            margin: 15px 0;
-            padding: 20px;
-            min-height: 220px;
+        .score-box {
+            background: #f1c40f;
+            color: #000;
+            padding: 5px 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 0 #d4ac0d;
         }
-        #item-icon { font-size: 130px; display: block; margin-bottom: 5px; }
-        #item-name { font-size: 45px; font-weight: bold; color: #2c3e50; }
 
-        .controls { display: flex; justify-content: center; gap: 25px; }
+        .main-content { padding: 25px; }
+        h1 { font-size: 1.8rem; color: var(--text); margin: 0 0 15px 0; }
+
+        #display-area { 
+            background: #f9f9f9;
+            border: 4px solid #f1f2f6;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        #item-icon { font-size: 120px; display: block; }
+        #item-name { font-size: 45px; font-weight: bold; color: var(--text); margin-top: 10px; }
+
+        .controls { display: flex; gap: 20px; }
         .btn { 
             flex: 1;
             font-size: 40px; 
             padding: 20px 0; 
             border: none; 
-            border-radius: 25px; 
+            border-radius: 20px; 
             cursor: pointer; 
             color: white; 
             font-weight: bold;
-            transition: all 0.1s;
+            transition: 0.1s;
             box-shadow: 0 8px rgba(0,0,0,0.1);
         }
         .btn:active { transform: translateY(4px); box-shadow: 0 2px rgba(0,0,0,0.1); }
-        #yes-btn { background-color: var(--success-color); }
-        #no-btn { background-color: var(--error-color); }
+        #yes-btn { background-color: var(--success); }
+        #no-btn { background-color: var(--error); }
 
         /* 結算畫面 */
-        #result-screen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        #result-score { font-size: 80px; color: var(--primary-color); margin: 20px 0; }
+        #result-screen { display: none; padding: 40px 20px; }
+        #final-score { font-size: 100px; color: var(--primary); font-weight: 900; margin: 20px 0; }
         .restart-btn {
-            background-color: var(--primary-color);
+            background-color: var(--primary);
+            color: white;
             font-size: 30px;
             padding: 15px 40px;
-            color: white;
             border: none;
             border-radius: 15px;
             cursor: pointer;
+            margin-top: 20px;
         }
 
+        /* 答對答錯的大覆蓋層 */
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -103,6 +113,142 @@
 
 <div id="game-box">
     <div id="quiz-screen">
-        <div class="stats">
+        <div class="header-bar">
             <div id="progress">第 1 / 10 題</div>
-            <div id="score-display">
+            <div class="score-box">得分: <span id="score-val">0</span></div>
+        </div>
+        <div class="main-content">
+            <h1>這是面試要帶的嗎？</h1>
+            <div id="display-area">
+                <span id="item-icon">❓</span>
+                <div id="item-name">準備...</div>
+            </div>
+            <div class="controls">
+                <button id="yes-btn" class="btn" onclick="handleAnswer(true)">要 ✅</button>
+                <button id="no-btn" class="btn" onclick="handleAnswer(false)">不要 ❌</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen">
+        <h1>🎉 完成挑戰！</h1>
+        <p style="font-size: 24px;">你的總分是：</p>
+        <div id="final-score">0</div>
+        <button class="restart-btn" onclick="startGame()">再玩一次 🔄</button>
+    </div>
+</div>
+
+<div id="overlay"></div>
+
+<script>
+    const items = [
+        { name: "身份證", icon: "🪪", want: true },
+        { name: "學歷證明", icon: "📜", want: true },
+        { name: "大頭相片", icon: "👤", want: true },
+        { name: "受僱證明", icon: "📄", want: true },
+        { name: "工作證明", icon: "🏢", want: true },
+        { name: "玩具車", icon: "🚗", want: false },
+        { name: "巧克力", icon: "🍫", want: false },
+        { name: "遊戲機", icon: "🎮", want: false },
+        { name: "梳子", icon: "🪮", want: false },
+        { name: "水瓶", icon: "🍼", want: false },
+        { name: "枕頭", icon: "🛌", want: false },
+        { name: "雨傘", icon: "🌂", want: false },
+        { name: "牙刷", icon: "🪥", want: false },
+        { name: "足球", icon: "⚽", want: false },
+        { name: "睡衣", icon: "👕", want: false },
+        { name: "漢堡包", icon: "🍔", want: false },
+        { name: "遙控器", icon: "📺", want: false },
+        { name: "垃圾桶", icon: "🗑️", want: false },
+        { name: "衣架", icon: "🧥", want: false },
+        { name: "剪刀", icon: "✂️", want: false }
+    ];
+
+    let currentItem = null;
+    let lastItemName = "";
+    let lastAnswer = null;
+    let answerRepeatCount = 0;
+    
+    let score = 0;
+    let questionNumber = 1; // 當前題號
+    const TOTAL_QUESTIONS = 10;
+
+    function startGame() {
+        score = 0;
+        questionNumber = 1;
+        lastItemName = "";
+        lastAnswer = null;
+        answerRepeatCount = 0;
+        
+        document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'block';
+        updateUI();
+        nextQuestion();
+    }
+
+    function updateUI() {
+        document.getElementById('score-val').innerText = score;
+        document.getElementById('progress').innerText = `第 ${questionNumber} / ${TOTAL_QUESTIONS} 題`;
+    }
+
+    function nextQuestion() {
+        document.getElementById('overlay').style.display = 'none';
+
+        // 檢查是否完成10題
+        if (questionNumber > TOTAL_QUESTIONS) {
+            showResults();
+            return;
+        }
+
+        let pool = items.filter(item => item.name !== lastItemName);
+        if (answerRepeatCount >= 2) {
+            pool = pool.filter(item => item.want !== lastAnswer);
+        }
+
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        currentItem = pool[randomIndex];
+
+        if (currentItem.want === lastAnswer) {
+            answerRepeatCount++;
+        } else {
+            answerRepeatCount = 1;
+        }
+        
+        lastItemName = currentItem.name;
+        lastAnswer = currentItem.want;
+
+        document.getElementById('item-icon').innerText = currentItem.icon;
+        document.getElementById('item-name').innerText = currentItem.name;
+        updateUI();
+    }
+
+    function handleAnswer(userChoice) {
+        const overlay = document.getElementById('overlay');
+        overlay.style.display = 'flex';
+        
+        if (userChoice === currentItem.want) {
+            overlay.innerText = "✅";
+            overlay.style.color = "#2ecc71";
+            score++; // 答對加分
+        } else {
+            overlay.innerText = "❌";
+            overlay.style.color = "#e74c3c";
+        }
+
+        // 重要：立即更新分數顯示，讓學生看見跳分
+        document.getElementById('score-val').innerText = score;
+
+        questionNumber++; // 增加題號
+        setTimeout(nextQuestion, 1000); // 1秒後跳轉
+    }
+
+    function showResults() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+    }
+
+    window.onload = startGame;
+</script>
+</body>
+</html>
