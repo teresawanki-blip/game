@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>面試法寶大檢查</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f8ff; margin: 0; padding: 20px; }
+        #game-container { background: white; border-radius: 20px; padding: 30px; display: inline-block; box-shadow: 0 0 20px rgba(0,0,0,0.1); width: 80%; max-width: 600px; }
+        h1 { color: #333; }
+        #item-display { font-size: 100px; margin: 40px 0; min-height: 150px; }
+        #item-name { font-size: 36px; font-weight: bold; margin-bottom: 20px; }
+        .btn-container { display: flex; justify-content: center; gap: 40px; }
+        button { font-size: 32px; padding: 20px 50px; border: none; border-radius: 15px; cursor: pointer; color: white; transition: 0.2s; }
+        #btn-yes { background-color: #4CAF50; } /* 綠色 */
+        #btn-no { background-color: #f44336; }  /* 紅色 */
+        button:active { transform: scale(0.9); }
+        #feedback { font-size: 80px; margin-top: 20px; height: 100px; }
+        .correct { color: #4CAF50; }
+        .wrong { color: #f44336; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1>這是面試要帶的嗎？</h1>
+    
+    <div id="item-display">🖼️</div>
+    <div id="item-name">準備好了嗎？</div>
+
+    <div class="btn-container">
+        <button id="btn-yes" onclick="checkAnswer(true)">對 ✅</button>
+        <button id="btn-no" onclick="checkAnswer(false)">不對 ❌</button>
+    </div>
+
+    <div id="feedback"></div>
+</div>
+
+<script>
+    // 遊戲題目資料庫
+    const items = [
+        { name: "身份證", icon: "🪪", isRequired: true },
+        { name: "學歷證明", icon: "📜", isRequired: true },
+        { name: "大頭相片", icon: "👤", isRequired: true },
+        { name: "受僱證明", icon: "📄", isRequired: true },
+        { name: "玩具車", icon: "🚗", isRequired: false },
+        { name: "零食", icon: "🍫", isRequired: false },
+        { name: "梳子", icon: "🪮", isRequired: false },
+        { name: "遊戲機", icon: "🎮", isRequired: false }
+    ];
+
+    let currentItem = {};
+
+    // 隨機抽題
+    function nextQuestion() {
+        document.getElementById('feedback').innerText = "";
+        const randomIndex = Math.floor(Math.random() * items.length);
+        currentItem = items[randomIndex];
+        document.getElementById('item-display').innerText = currentItem.icon;
+        document.getElementById('item-name').innerText = currentItem.name;
+    }
+
+    // 檢查答案
+    function checkAnswer(userChoice) {
+        const feedbackEl = document.getElementById('feedback');
+        
+        if (userChoice === currentItem.isRequired) {
+            feedbackEl.innerText = "✅ 正確！";
+            feedbackEl.className = "correct";
+        } else {
+            feedbackEl.innerText = "❌ 不正確";
+            feedbackEl.className = "wrong";
+        }
+
+        // 2秒後自動跳下一題
+        setTimeout(nextQuestion, 2000);
+    }
+
+    // 網頁開啟後立即開始第一題
+    window.onload = nextQuestion;
+</script>
+
+</body>
+</html>
