@@ -2,81 +2,132 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>面試法寶大檢查</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面試準備大考驗</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f8ff; margin: 0; padding: 20px; }
-        #game-container { background: white; border-radius: 20px; padding: 30px; display: inline-block; box-shadow: 0 0 20px rgba(0,0,0,0.1); width: 80%; max-width: 600px; }
-        h1 { color: #333; }
-        #item-display { font-size: 100px; margin: 40px 0; min-height: 150px; }
-        #item-name { font-size: 36px; font-weight: bold; margin-bottom: 20px; }
-        .btn-container { display: flex; justify-content: center; gap: 40px; }
-        button { font-size: 32px; padding: 20px 50px; border: none; border-radius: 15px; cursor: pointer; color: white; transition: 0.2s; }
-        #btn-yes { background-color: #4CAF50; } /* 綠色 */
-        #btn-no { background-color: #f44336; }  /* 紅色 */
-        button:active { transform: scale(0.9); }
-        #feedback { font-size: 80px; margin-top: 20px; height: 100px; }
-        .correct { color: #4CAF50; }
-        .wrong { color: #f44336; }
+        :root {
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --bg-color: #ecf0f1;
+        }
+        body { 
+            font-family: "Microsoft JhengHei", Arial, sans-serif; 
+            text-align: center; 
+            background-color: var(--bg-color); 
+            margin: 0; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #game-box { 
+            background: white; 
+            border-radius: 30px; 
+            padding: 40px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            width: 90%; 
+            max-width: 700px;
+        }
+        h1 { color: #2c3e50; font-size: 2.5rem; margin-top: 0; }
+        
+        /* 圖片/圖示顯示區 */
+        #display-area { 
+            background: #f9f9f9;
+            border: 5px dashed #bdc3c7;
+            border-radius: 20px;
+            margin: 20px 0;
+            padding: 20px;
+        }
+        #item-icon { font-size: 150px; line-height: 1; margin: 10px 0; }
+        #item-name { font-size: 48px; font-weight: bold; color: #34495e; margin-bottom: 20px; }
+
+        /* 按鈕設計 */
+        .controls { display: flex; justify-content: space-around; gap: 20px; }
+        .btn { 
+            flex: 1;
+            font-size: 40px; 
+            padding: 30px; 
+            border: none; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            color: white; 
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+        #yes-btn { background-color: var(--success-color); box-shadow: 0 8px #27ae60; }
+        #no-btn { background-color: var(--error-color); box-shadow: 0 8px #c0392b; }
+
+        /* 回饋層 */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 200px;
+            background: rgba(255,255,255,0.8);
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <h1>這是面試要帶的嗎？</h1>
+<div id="game-box">
+    <h1>見工要帶嗎？</h1>
     
-    <div id="item-display">🖼️</div>
-    <div id="item-name">準備好了嗎？</div>
-
-    <div class="btn-container">
-        <button id="btn-yes" onclick="checkAnswer(true)">對 ✅</button>
-        <button id="btn-no" onclick="checkAnswer(false)">不對 ❌</button>
+    <div id="display-area">
+        <div id="item-icon">❓</div>
+        <div id="item-name">載入中...</div>
     </div>
 
-    <div id="feedback"></div>
+    <div class="controls">
+        <button id="yes-btn" class="btn" onclick="check(true)">要 ✅</button>
+        <button id="no-btn" class="btn" onclick="check(false)">不要 ❌</button>
+    </div>
 </div>
 
+<div id="overlay"></div>
+
 <script>
-    // 遊戲題目資料庫
     const items = [
-        { name: "身份證", icon: "🪪", isRequired: true },
-        { name: "學歷證明", icon: "📜", isRequired: true },
-        { name: "大頭相片", icon: "👤", isRequired: true },
-        { name: "受僱證明", icon: "📄", isRequired: true },
-        { name: "玩具車", icon: "🚗", isRequired: false },
-        { name: "零食", icon: "🍫", isRequired: false },
-        { name: "梳子", icon: "🪮", isRequired: false },
-        { name: "遊戲機", icon: "🎮", isRequired: false }
+        { name: "身份證", icon: "🪪", want: true },
+        { name: "學歷證明", icon: "📜", want: true },
+        { name: "大頭相片", icon: "👤", want: true },
+        { name: "受僱證明", icon: "📄", want: true },
+        { name: "玩具車", icon: "🚗", want: false },
+        { name: "巧克力", icon: "🍫", want: false },
+        { name: "遊戲機", icon: "🎮", want: false },
+        { name: "梳子", icon: "🪮", want: false },
+        { name: "水瓶", icon: "🍼", want: false }
     ];
 
     let currentItem = {};
 
-    // 隨機抽題
-    function nextQuestion() {
-        document.getElementById('feedback').innerText = "";
-        const randomIndex = Math.floor(Math.random() * items.length);
-        currentItem = items[randomIndex];
-        document.getElementById('item-display').innerText = currentItem.icon;
+    function next() {
+        document.getElementById('overlay').style.display = 'none';
+        currentItem = items[Math.floor(Math.random() * items.length)];
+        document.getElementById('item-icon').innerText = currentItem.icon;
         document.getElementById('item-name').innerText = currentItem.name;
     }
 
-    // 檢查答案
-    function checkAnswer(userChoice) {
-        const feedbackEl = document.getElementById('feedback');
+    function check(userSay) {
+        const overlay = document.getElementById('overlay');
+        overlay.style.display = 'flex';
         
-        if (userChoice === currentItem.isRequired) {
-            feedbackEl.innerText = "✅ 正確！";
-            feedbackEl.className = "correct";
+        if (userSay === currentItem.want) {
+            overlay.innerText = "✅";
+            overlay.style.color = "#2ecc71";
         } else {
-            feedbackEl.innerText = "❌ 不正確";
-            feedbackEl.className = "wrong";
+            overlay.innerText = "❌";
+            overlay.style.color = "#e74c3c";
         }
 
-        // 2秒後自動跳下一題
-        setTimeout(nextQuestion, 2000);
+        setTimeout(next, 1500); // 1.5秒後自動下一題
     }
 
-    // 網頁開啟後立即開始第一題
-    window.onload = nextQuestion;
+    window.onload = next;
 </script>
 
 </body>
