@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>面試準備大考驗 v2</title>
+    <title>面試法寶大檢查 v2.1</title>
     <style>
         :root {
             --success-color: #2ecc71;
             --error-color: #e74c3c;
-            --bg-color: #f7f9fc;
+            --bg-color: #f0f7fa;
         }
         body { 
-            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; 
+            font-family: "Microsoft JhengHei", sans-serif; 
             text-align: center; 
             background-color: var(--bg-color); 
             margin: 0; 
@@ -30,18 +30,16 @@
             max-width: 650px;
         }
         h1 { color: #2c3e50; font-size: 2.2rem; margin-bottom: 10px; }
-        p { color: #7f8c8d; font-size: 1.2rem; margin-top: 0; }
-        
         #display-area { 
             background: #fdfdfd;
-            border: 6px solid #f1f2f6;
+            border: 6px solid #eef2f3;
             border-radius: 30px;
             margin: 20px 0;
             padding: 30px;
+            min-height: 250px;
         }
         #item-icon { font-size: 140px; display: block; margin-bottom: 10px; }
         #item-name { font-size: 50px; font-weight: bold; color: #2c3e50; }
-
         .controls { display: flex; justify-content: center; gap: 30px; }
         .btn { 
             flex: 1;
@@ -53,13 +51,11 @@
             color: white; 
             font-weight: bold;
             transition: all 0.1s;
-            box-shadow: 0 8px #00000022;
+            box-shadow: 0 8px rgba(0,0,0,0.1);
         }
-        .btn:active { transform: translateY(4px); box-shadow: 0 4px #00000022; }
-        
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px rgba(0,0,0,0.1); }
         #yes-btn { background-color: var(--success-color); }
         #no-btn { background-color: var(--error-color); }
-
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -76,32 +72,25 @@
 
 <div id="game-box">
     <h1>見工法寶檢查</h1>
-    <p>這是面試前要準備的文件嗎？</p>
-    
     <div id="display-area">
         <span id="item-icon">❓</span>
-        <div id="item-name">載入中</div>
+        <div id="item-name">準備...</div>
     </div>
-
     <div class="controls">
-        <button id="yes-btn" class="btn" onclick="check(true)">要 ✅</button>
-        <button id="no-btn" class="btn" onclick="check(false)">不要 ❌</button>
+        <button id="yes-btn" class="btn" onclick="handleAnswer(true)">要 ✅</button>
+        <button id="no-btn" class="btn" onclick="handleAnswer(false)">不要 ❌</button>
     </div>
 </div>
 
 <div id="overlay"></div>
 
 <script>
-    // 題目資料庫 (共 20 個項目)
     const items = [
-        // 核心文件 (要帶)
         { name: "身份證", icon: "🪪", want: true },
         { name: "學歷證明", icon: "📜", want: true },
         { name: "大頭相片", icon: "👤", want: true },
         { name: "受僱證明", icon: "📄", want: true },
-        // 核心文件變體/補充
         { name: "工作證明", icon: "🏢", want: true },
-        // 錯誤項目 (不要帶)
         { name: "玩具車", icon: "🚗", want: false },
         { name: "巧克力", icon: "🍫", want: false },
         { name: "遊戲機", icon: "🎮", want: false },
@@ -119,43 +108,46 @@
         { name: "剪刀", icon: "✂️", want: false }
     ];
 
-    let currentItem = {};
-    let lastItem = null;
+    let currentItem = null;
+    let lastItemName = "";
     let lastAnswer = null;
-    let consecutiveCount = 0;
+    let answerRepeatCount = 0;
 
-    function next() {
+    function nextQuestion() {
         document.getElementById('overlay').style.display = 'none';
-        
-        let pool = items.filter(item => item !== lastItem); // 確保不連續出現同一個項目
 
-        // 防止同一個答案 (要/不要) 超過連續兩次
-        if (consecutiveCount >= 2) {
+        // 1. 先排除「上一題」出現過的項目名稱
+        let pool = items.filter(item => item.name !== lastItemName);
+
+        // 2. 如果同一個答案（要/不要）已經連續出現 2 次，強制換另一種答案
+        if (answerRepeatCount >= 2) {
             pool = pool.filter(item => item.want !== lastAnswer);
         }
 
+        // 隨機抽取
         const randomIndex = Math.floor(Math.random() * pool.length);
         currentItem = pool[randomIndex];
 
-        // 更新計數器
+        // 3. 更新狀態追蹤
         if (currentItem.want === lastAnswer) {
-            consecutiveCount++;
+            answerRepeatCount++;
         } else {
-            consecutiveCount = 1;
+            answerRepeatCount = 1;
         }
-
-        lastItem = currentItem;
+        
+        lastItemName = currentItem.name;
         lastAnswer = currentItem.want;
 
+        // 更新畫面
         document.getElementById('item-icon').innerText = currentItem.icon;
         document.getElementById('item-name').innerText = currentItem.name;
     }
 
-    function check(userSay) {
+    function handleAnswer(userChoice) {
         const overlay = document.getElementById('overlay');
         overlay.style.display = 'flex';
         
-        if (userSay === currentItem.want) {
+        if (userChoice === currentItem.want) {
             overlay.innerText = "✅";
             overlay.style.color = "#2ecc71";
         } else {
@@ -163,11 +155,10 @@
             overlay.style.color = "#e74c3c";
         }
 
-        setTimeout(next, 1200); // 1.2秒後換題，節奏更快一點
+        setTimeout(nextQuestion, 1200);
     }
 
-    window.onload = next;
+    window.onload = nextQuestion;
 </script>
-
 </body>
 </html>
