@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>面試法寶大檢查 v2.1</title>
+    <title>面試法寶大檢查 - 計分版</title>
     <style>
         :root {
             --success-color: #2ecc71;
             --error-color: #e74c3c;
             --bg-color: #f0f7fa;
+            --primary-color: #3498db;
         }
         body { 
             font-family: "Microsoft JhengHei", sans-serif; 
@@ -28,23 +29,34 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
             width: 85%; 
             max-width: 650px;
+            position: relative;
         }
-        h1 { color: #2c3e50; font-size: 2.2rem; margin-bottom: 10px; }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 24px;
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        h1 { color: #2c3e50; font-size: 2rem; margin: 0; }
+        
         #display-area { 
             background: #fdfdfd;
             border: 6px solid #eef2f3;
             border-radius: 30px;
-            margin: 20px 0;
-            padding: 30px;
-            min-height: 250px;
+            margin: 15px 0;
+            padding: 20px;
+            min-height: 220px;
         }
-        #item-icon { font-size: 140px; display: block; margin-bottom: 10px; }
-        #item-name { font-size: 50px; font-weight: bold; color: #2c3e50; }
-        .controls { display: flex; justify-content: center; gap: 30px; }
+        #item-icon { font-size: 130px; display: block; margin-bottom: 5px; }
+        #item-name { font-size: 45px; font-weight: bold; color: #2c3e50; }
+
+        .controls { display: flex; justify-content: center; gap: 25px; }
         .btn { 
             flex: 1;
-            font-size: 45px; 
-            padding: 25px 0; 
+            font-size: 40px; 
+            padding: 20px 0; 
             border: none; 
             border-radius: 25px; 
             cursor: pointer; 
@@ -56,6 +68,25 @@
         .btn:active { transform: translateY(4px); box-shadow: 0 2px rgba(0,0,0,0.1); }
         #yes-btn { background-color: var(--success-color); }
         #no-btn { background-color: var(--error-color); }
+
+        /* 結算畫面 */
+        #result-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #result-score { font-size: 80px; color: var(--primary-color); margin: 20px 0; }
+        .restart-btn {
+            background-color: var(--primary-color);
+            font-size: 30px;
+            padding: 15px 40px;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -71,94 +102,7 @@
 <body>
 
 <div id="game-box">
-    <h1>見工法寶檢查</h1>
-    <div id="display-area">
-        <span id="item-icon">❓</span>
-        <div id="item-name">準備...</div>
-    </div>
-    <div class="controls">
-        <button id="yes-btn" class="btn" onclick="handleAnswer(true)">要 ✅</button>
-        <button id="no-btn" class="btn" onclick="handleAnswer(false)">不要 ❌</button>
-    </div>
-</div>
-
-<div id="overlay"></div>
-
-<script>
-    const items = [
-        { name: "身份證", icon: "🪪", want: true },
-        { name: "學歷證明", icon: "📜", want: true },
-        { name: "大頭相片", icon: "👤", want: true },
-        { name: "受僱證明", icon: "📄", want: true },
-        { name: "工作證明", icon: "🏢", want: true },
-        { name: "玩具車", icon: "🚗", want: false },
-        { name: "巧克力", icon: "🍫", want: false },
-        { name: "遊戲機", icon: "🎮", want: false },
-        { name: "梳子", icon: "🪮", want: false },
-        { name: "水瓶", icon: "🍼", want: false },
-        { name: "枕頭", icon: "🛌", want: false },
-        { name: "雨傘", icon: "🌂", want: false },
-        { name: "牙刷", icon: "🪥", want: false },
-        { name: "足球", icon: "⚽", want: false },
-        { name: "睡衣", icon: "👕", want: false },
-        { name: "漢堡包", icon: "🍔", want: false },
-        { name: "遙控器", icon: "📺", want: false },
-        { name: "垃圾桶", icon: "🗑️", want: false },
-        { name: "衣架", icon: "🧥", want: false },
-        { name: "剪刀", icon: "✂️", want: false }
-    ];
-
-    let currentItem = null;
-    let lastItemName = "";
-    let lastAnswer = null;
-    let answerRepeatCount = 0;
-
-    function nextQuestion() {
-        document.getElementById('overlay').style.display = 'none';
-
-        // 1. 先排除「上一題」出現過的項目名稱
-        let pool = items.filter(item => item.name !== lastItemName);
-
-        // 2. 如果同一個答案（要/不要）已經連續出現 2 次，強制換另一種答案
-        if (answerRepeatCount >= 2) {
-            pool = pool.filter(item => item.want !== lastAnswer);
-        }
-
-        // 隨機抽取
-        const randomIndex = Math.floor(Math.random() * pool.length);
-        currentItem = pool[randomIndex];
-
-        // 3. 更新狀態追蹤
-        if (currentItem.want === lastAnswer) {
-            answerRepeatCount++;
-        } else {
-            answerRepeatCount = 1;
-        }
-        
-        lastItemName = currentItem.name;
-        lastAnswer = currentItem.want;
-
-        // 更新畫面
-        document.getElementById('item-icon').innerText = currentItem.icon;
-        document.getElementById('item-name').innerText = currentItem.name;
-    }
-
-    function handleAnswer(userChoice) {
-        const overlay = document.getElementById('overlay');
-        overlay.style.display = 'flex';
-        
-        if (userChoice === currentItem.want) {
-            overlay.innerText = "✅";
-            overlay.style.color = "#2ecc71";
-        } else {
-            overlay.innerText = "❌";
-            overlay.style.color = "#e74c3c";
-        }
-
-        setTimeout(nextQuestion, 1200);
-    }
-
-    window.onload = nextQuestion;
-</script>
-</body>
-</html>
+    <div id="quiz-screen">
+        <div class="stats">
+            <div id="progress">第 1 / 10 題</div>
+            <div id="score-display">
