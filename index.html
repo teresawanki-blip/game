@@ -142,24 +142,29 @@
 
 <script>
     const items = [
+        // 核心文件 (要帶)
         { name: "身份證", icon: "🪪", want: true },
         { name: "學歷證明", icon: "📜", want: true },
         { name: "大頭相片", icon: "👤", want: true },
         { name: "受僱證明", icon: "📄", want: true },
         { name: "工作證明", icon: "🏢", want: true },
+        
+        // 相似干擾項 (形狀接近文件/卡片，但不要帶)
+        { name: "信封", icon: "✉️", want: false },      // 形狀像文件
+        { name: "筆記本", icon: "📓", want: false },    // 形狀像證書
+        { name: "會員卡", icon: "💳", want: false },    // 形狀像身份證
+        { name: "餐巾紙", icon: "🧻", want: false },    // 白色長方形
+        { name: "宣傳單", icon: "🗞️", want: false },    // 也是紙張
+        
+        // 其他干擾項
         { name: "玩具車", icon: "🚗", want: false },
         { name: "巧克力", icon: "🍫", want: false },
         { name: "遊戲機", icon: "🎮", want: false },
         { name: "梳子", icon: "🪮", want: false },
-        { name: "水瓶", icon: "🍼", want: false },
-        { name: "枕頭", icon: "🛌", want: false },
+        { name: "計算機", icon: "🔢", want: false },
         { name: "雨傘", icon: "🌂", want: false },
-        { name: "牙刷", icon: "🪥", want: false },
         { name: "足球", icon: "⚽", want: false },
-        { name: "睡衣", icon: "👕", want: false },
         { name: "漢堡包", icon: "🍔", want: false },
-        { name: "遙控器", icon: "📺", want: false },
-        { name: "垃圾桶", icon: "🗑️", want: false },
         { name: "衣架", icon: "🧥", want: false },
         { name: "剪刀", icon: "✂️", want: false }
     ];
